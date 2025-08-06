@@ -13,10 +13,6 @@ namespace SneedHooks
         public static OnHitAttacker OnHitAttackerActions;
         public static OnHitAttacker PreOnHitAttackerActions;
 
-        public delegate void OnHitAttackerInventory(DamageInfo damageInfo, CharacterBody victimBody, CharacterBody attackerBody, Inventory attackerInventory);
-        public static OnHitAttackerInventory OnHitAttackerInventoryActions;
-        public static OnHitAttackerInventory PreOnHitAttackerInventoryActions;
-
         internal static void GlobalEventManager_ProcessHitEnemy(On.RoR2.GlobalEventManager.orig_ProcessHitEnemy orig, GlobalEventManager self, DamageInfo damageInfo, UnityEngine.GameObject victim)
         {
             CharacterBody attackerBody = null;
@@ -36,9 +32,6 @@ namespace SneedHooks
                     if (attackerBody)
                     {
                         PreOnHitAttackerActions?.Invoke(damageInfo, victimBody, attackerBody);
-
-                        attackerInventory = attackerBody.inventory;
-                        if (attackerInventory) PreOnHitAttackerInventoryActions.Invoke(damageInfo, victimBody, attackerBody, attackerInventory);
                     }
                 }
                 else
@@ -55,7 +48,6 @@ namespace SneedHooks
                 if (attackerBody)
                 {
                     OnHitAttackerActions?.Invoke(damageInfo, victimBody, attackerBody);
-                    if (attackerInventory) OnHitAttackerInventoryActions?.Invoke(damageInfo, victimBody, attackerBody, attackerInventory);
                 }
             }
         }

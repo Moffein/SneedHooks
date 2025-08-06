@@ -30,11 +30,6 @@ namespace SneedHooks
             HealthComponent victim, CharacterBody victimBody, CharacterBody attackerBody);
         public static ModifyFinalDamageAttackerDelegate ModifyFinalDamageAttackerActions;
 
-        public delegate void ModifyFinalDamageAttackerInventoryDelegate(DamageModifierArgs damageModifierArgs, DamageInfo damageInfo,
-            HealthComponent victim, CharacterBody victimBody,
-            CharacterBody attackerBody, Inventory attackerInventory);
-        public static ModifyFinalDamageAttackerInventoryDelegate ModifyFinalDamageAttackerInventoryActions;
-
         internal static void HealthComponent_TakeDamageProcess(MonoMod.Cil.ILContext il)
         {
             ILCursor c = new ILCursor(il);
@@ -46,6 +41,7 @@ namespace SneedHooks
                 c.Emit(OpCodes.Ldarg_1);    //damageInfo
                 c.EmitDelegate<Func<float, HealthComponent, DamageInfo, float>>((origDamage, victimHealth, damageInfo) =>
                 {
+
                     float newDamage = origDamage;
                     CharacterBody victimBody = victimHealth.body;
                     if (victimBody)
@@ -60,10 +56,6 @@ namespace SneedHooks
                             {
                                 ModifyFinalDamageAttackerActions?.Invoke(damageModifierArgs, damageInfo, victimHealth, victimBody, attackerBody);
                                 Inventory attackerInventory = attackerBody.inventory;
-                                if (attackerInventory)
-                                {
-                                    ModifyFinalDamageAttackerInventoryActions?.Invoke(damageModifierArgs, damageInfo, victimHealth, victimBody, attackerBody, attackerInventory);
-                                }
                             }
                         }
 
