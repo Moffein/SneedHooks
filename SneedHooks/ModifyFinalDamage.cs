@@ -32,38 +32,52 @@ namespace SneedHooks
 
         internal static void HealthComponent_TakeDamageProcess(MonoMod.Cil.ILContext il)
         {
+            bool matched = false;
             ILCursor c = new ILCursor(il);
+            var targetIndex = 0;
+            int ignoreIndex = 0;
             if (c.TryGotoNext(
-                 x => x.MatchStloc(7)
-                ))
+                x => x.MatchLdloc(out targetIndex),
+                x => x.MatchLdloc(out ignoreIndex),
+                x => x.MatchLdfld<TeamDef>("friendlyFireScaling")
+            ))
             {
-                c.Emit(OpCodes.Ldarg_0);    //self
-                c.Emit(OpCodes.Ldarg_1);    //damageInfo
-                c.EmitDelegate<Func<float, HealthComponent, DamageInfo, float>>((origDamage, victimHealth, damageInfo) =>
+                c = new ILCursor(il);
+                if (c.TryGotoNext(
+                     x => x.MatchStloc(targetIndex)
+                    ))
                 {
-
-                    float newDamage = origDamage;
-                    CharacterBody victimBody = victimHealth.body;
-                    if (victimBody)
+                    c.Emit(OpCodes.Ldarg_0);    //self
+                    c.Emit(OpCodes.Ldarg_1);    //damageInfo
+                    c.EmitDelegate<Func<float, HealthComponent, DamageInfo, float>>((origDamage, victimHealth, damageInfo) =>
                     {
-                        DamageModifierArgs damageModifierArgs = new DamageModifierArgs();
-                        ModifyFinalDamageActions?.Invoke(damageModifierArgs, damageInfo, victimHealth, victimBody);
 
-                        if (damageInfo.attacker)
+                        float newDamage = origDamage;
+                        CharacterBody victimBody = victimHealth.body;
+                        if (victimBody)
                         {
-                            CharacterBody attackerBody = damageInfo.attacker.GetComponent<CharacterBody>();
-                            if (attackerBody)
-                            {
-                                ModifyFinalDamageAttackerActions?.Invoke(damageModifierArgs, damageInfo, victimHealth, victimBody, attackerBody);
-                            }
-                        }
+                            DamageModifierArgs damageModifierArgs = new DamageModifierArgs();
+                            ModifyFinalDamageActions?.Invoke(damageModifierArgs, damageInfo, victimHealth, victimBody);
 
-                        newDamage *= (1f + damageModifierArgs.damageMultAdd) * damageModifierArgs.damageMultFinal / (1f + damageModifierArgs.damageReductionFactorAdd);
-                    }
-                    return newDamage;
-                });
+                            if (damageInfo.attacker)
+                            {
+                                CharacterBody attackerBody = damageInfo.attacker.GetComponent<CharacterBody>();
+                                if (attackerBody)
+                                {
+                                    ModifyFinalDamageAttackerActions?.Invoke(damageModifierArgs, damageInfo, victimHealth, victimBody, attackerBody);
+                                }
+                            }
+
+                            newDamage *= (1f + damageModifierArgs.damageMultAdd) * damageModifierArgs.damageMultFinal / (1f + damageModifierArgs.damageReductionFactorAdd);
+                        }
+                        return newDamage;
+                    });
+                    matched = true;
+                }
             }
-            else
+
+            
+            if (!matched)
             {
                 UnityEngine.Debug.LogError("SneedHooks: ModifyFinalDamage IL Hook failed. This will break a lot of things.");
             }
