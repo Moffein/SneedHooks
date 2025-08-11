@@ -20,6 +20,8 @@ namespace SneedHooks
 
             /// <summary>Damage reduction multiplier. Only modify this with addition. Full Formula: (1 + damageMultAdd) * damageMultFinal / (1f + damageReductionFactorAdd)</summary>
             public float damageReductionFactorAdd = 0f;
+
+            public float flatDamageAdd = 0f;
         }
 
         public delegate void ModifyFinalDamageDelegate(DamageModifierArgs damageModifierArgs, DamageInfo damageInfo,
@@ -69,6 +71,7 @@ namespace SneedHooks
                             }
 
                             newDamage *= (1f + damageModifierArgs.damageMultAdd) * damageModifierArgs.damageMultFinal / (1f + damageModifierArgs.damageReductionFactorAdd);
+                            newDamage += damageModifierArgs.flatDamageAdd;
                         }
                         return newDamage;
                     });
