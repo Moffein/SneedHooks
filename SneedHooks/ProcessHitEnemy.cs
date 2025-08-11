@@ -28,10 +28,13 @@ namespace SneedHooks
                 {
                     PreOnHitActions?.Invoke(damageInfo, victimBody);
 
-                    if (damageInfo.attacker) attackerBody = damageInfo.attacker.GetComponent<CharacterBody>();
-                    if (attackerBody)
+                    if (damageInfo.attacker)
                     {
-                        PreOnHitAttackerActions?.Invoke(damageInfo, victimBody, attackerBody);
+                        attackerBody = damageInfo.attacker.GetComponent<CharacterBody>();
+                        if (attackerBody)
+                        {
+                            PreOnHitAttackerActions?.Invoke(damageInfo, victimBody, attackerBody);
+                        }
                     }
                 }
                 else
@@ -42,7 +45,7 @@ namespace SneedHooks
 
             orig(self, damageInfo, victim);
 
-            if (validDamage)
+            if (validDamage && victimBody)
             {
                 OnHitActions?.Invoke(damageInfo, victimBody);
                 if (attackerBody)

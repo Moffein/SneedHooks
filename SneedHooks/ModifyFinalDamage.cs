@@ -55,7 +55,6 @@ namespace SneedHooks
                             if (attackerBody)
                             {
                                 ModifyFinalDamageAttackerActions?.Invoke(damageModifierArgs, damageInfo, victimHealth, victimBody, attackerBody);
-                                Inventory attackerInventory = attackerBody.inventory;
                             }
                         }
 
